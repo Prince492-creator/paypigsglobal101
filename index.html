@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PayPigsGlobal Signup</title>
+  <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&disable-funding=paylater" data-sdk-integration-source="button-factory"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f8f8f8;
+    }
+    h2 {
+      color: #222;
+    }
+    input, button {
+      padding: 10px;
+      margin: 8px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    form {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Sign Up – $6 USD</h2>
+  <form id="signupForm">
+    <label>Full Name:</label>
+    <input type="text" name="name" required />
+
+    <label>Email:</label>
+    <input type="email" name="email" required />
+
+    <label>Desired Username:</label>
+    <input type="text" name="username" required />
+
+    <input type="hidden" name="amount" value="6" />
+
+    <button type="submit">Submit Info</button>
+  </form>
+
+  <div id="paypal-button-container" style="max-width: 400px; margin: 20px auto;"></div>
+
+  <script>
+    const form = document.getElementById("signupForm");
+    let formData = {};
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const data = new FormData(form);
+      formData = Object.fromEntries(data.entries());
+
+      fetch("https://script.google.com/macros/s/AKfycby-wCY8z1WANlAagoMG1iUzZNlq4cNVddxbpW6xxNg5ZmgHbvdK6svt7iNVCbj-l0nm/exec", {
+        method: "POST",
+        body: new URLSearchParams(formData),
+      })
+      .then(response => alert("Info submitted! Now complete payment."))
+      .catch(error => alert("Error submitting info."));
+    });
+
+    paypal.Buttons({
+      style: {
+        layout: 'vertical',
+        color:  'gold',
+        shape:  'rect',
+        label:  'paypal'
+      },
+      createOrder: function(data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: "6"
+            },
+            payee: {
+              email_address: "bfncna6@gmail.com"
+            }
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          alert('Payment completed by ' + details.payer.name.given_name + '!');
+        });
+      },
+      onError: function(err) {
+        console.error(err);
+        alert("Payment error. Try again.");
+      }
+    }).render('#paypal-button-container');
+  </script>
+</body>
+</html>
